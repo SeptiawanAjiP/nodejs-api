@@ -1,0 +1,21 @@
+{
+  "name": "dcloud-ci-cd-demo",
+  "version": "1.0.0",
+  "description": "Simple Express API for demonstrating GitHub Actions CI/CD workflow.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "express",
+    "github-actions",
+    "ci-cd",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
