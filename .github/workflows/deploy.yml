@@ -1,12 +1,16 @@
-name: CI/CD Demo
+name: CI/CD Deploy
 
 on:
   push:
     branches:
-      - "**"
+      - main
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
-  build-test-deploy:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +28,35 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Simulate deployment
-        run: echo "Deploy to server simulated"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} '
+            set -e
+            cd /var/www/nodejs-api
+            git checkout main
+            git pull --ff-only origin main
+            npm install
+            npm test
+            if pm2 describe nodejs-api >/dev/null 2>&1; then
+              pm2 reload ecosystem.config.js --update-env
+            else
+              pm2 start ecosystem.config.js
+            fi
+            pm2 save
+          '
