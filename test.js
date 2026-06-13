@@ -1,9 +1,9 @@
 const assert = require("assert");
-const { startServer, users } = require("./server");
+const { startServer, resetUsers } = require("./server");
 
 async function runTests() {
   // Reset data in-memory agar hasil test selalu konsisten.
-  users.length = 0;
+  resetUsers();
 
   const server = startServer(0);
 
@@ -20,7 +20,8 @@ async function runTests() {
     assert.strictEqual(getResponse.status, 200, "GET /users should return 200");
 
     const initialUsers = await getResponse.json();
-    assert.deepStrictEqual(initialUsers, [], "Initial user list should be empty");
+    assert.strictEqual(initialUsers.length, 10, "Initial user list should contain 10 dummy users");
+    assert.strictEqual(initialUsers[0].name, "Alice Johnson", "First dummy user should match seed data");
 
     const postResponse = await fetch(`${baseUrl}/users`, {
       method: "POST",
@@ -43,8 +44,8 @@ async function runTests() {
     assert.strictEqual(secondGetResponse.status, 200, "Second GET /users should return 200");
 
     const usersAfterInsert = await secondGetResponse.json();
-    assert.strictEqual(usersAfterInsert.length, 1, "User list should contain one item");
-    assert.strictEqual(usersAfterInsert[0].id, createdUser.id, "Stored user should match created user");
+    assert.strictEqual(usersAfterInsert.length, 11, "User list should contain eleven items after insert");
+    assert.strictEqual(usersAfterInsert[10].id, createdUser.id, "Stored user should match created user");
 
     console.log("All tests passed.");
   } finally {

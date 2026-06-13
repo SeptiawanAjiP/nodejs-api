@@ -8,8 +8,29 @@ const HOST = process.env.HOST || "127.0.0.1";
 app.use(express.json());
 
 // Data disimpan di memory agar demo tetap sederhana dan tanpa database.
-const users = [];
-let nextId = 1;
+function createInitialUsers() {
+  return [
+    { id: 1, name: "Alice Johnson", email: "alice.johnson@example.com" },
+    { id: 2, name: "Bob Smith", email: "bob.smith@example.com" },
+    { id: 3, name: "Charlie Brown", email: "charlie.brown@example.com" },
+    { id: 4, name: "Diana Prince", email: "diana.prince@example.com" },
+    { id: 5, name: "Ethan Walker", email: "ethan.walker@example.com" },
+    { id: 6, name: "Fiona Green", email: "fiona.green@example.com" },
+    { id: 7, name: "George Miller", email: "george.miller@example.com" },
+    { id: 8, name: "Hannah Lee", email: "hannah.lee@example.com" },
+    { id: 9, name: "Ivan Ross", email: "ivan.ross@example.com" },
+    { id: 10, name: "Julia Adams", email: "julia.adams@example.com" }
+  ];
+}
+
+const users = createInitialUsers();
+let nextId = users.length + 1;
+
+function resetUsers() {
+  users.length = 0;
+  users.push(...createInitialUsers());
+  nextId = users.length + 1;
+}
 
 app.get("/", (req, res) => {
   res.json({
@@ -96,7 +117,8 @@ function startServer(port = PORT, host = HOST) {
 module.exports = {
   app,
   startServer,
-  users
+  users,
+  resetUsers
 };
 
 if (require.main === module) {
